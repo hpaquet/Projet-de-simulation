@@ -1,19 +1,19 @@
 clc;close all;clear all;
-%% Paramètres
-R = 1; % rayon de la sphère
+%% ParamÃ¨tres
+R = 1; % rayon de la sphÃ¨re
 n = 10; % nombre de dimension 
-N_tot = 1e8; % nombre d'itération maximum 
+N_tot = 1e8; % nombre d'itÃ©ration maximum 
 
-Err0 = 1e-3; %erreur désiré 
+Err0 = 1e-3; %erreur dÃ©sirÃ© 
 
 %% Boucle principale
-V_anal = (pi^(n/2))/(gamma(n/2 +1))*R^n; % Volume de l'hypershpère obtenue de façon analytique 
+V_anal = (pi^(n/2))/(gamma(n/2 +1))*R^n; % Volume de l'hypershpÃ¨re obtenue de faÃ§on analytique 
 
 range = 100:10:N_tot; 
 err = [];
 V = [];
 
-% Calcul de volume de volume avec la méthode de Monté-Carlo 100 fois
+% Calcul de volume de volume avec la mÃ©thode de MontÃ©-Carlo 100 fois
 for i = 1:100
     
     [V(end+1,:), err(end+1,:)] = volumeMC(R,n, V_anal, range);
@@ -29,7 +29,7 @@ err_moy = sum(err,1)./100; % calcul de l'erreur moyenne
 % calcul de l'erreur (pente du graphique loglog)
 p = (log(err_moy(end))-log(err_moy(50)))/(log(range(end))-log(range(50)));
 
-% valeur théorique de p 
+% valeur thÃ©orique de p 
 p_th = (log(1/sqrt(range(end)))-log(1/sqrt(range(50))))/(log(range(end))-log(range(50)));
 
 % Valeur de A
@@ -51,15 +51,15 @@ hold off
 xlabel('N')
 ylabel('moyenne |V(N)-V_anal|/V_anal')
 
-%Affichage d'un message avec les résultats
-m0 = sprintf('\bfbold\rm Hypersphère de dimension %2d \n', n );
+%Affichage d'un message avec les rÃ©sultats
+m0 = sprintf('\bfbold\rm HypersphÃ¨re de dimension %2d \n', n );
 m1 = sprintf('L''erreur (p) est de : %.3f \n', p );
-m2 = sprintf('La valeur théorique de p est de : %.3f \n', p_th );
+m2 = sprintf('La valeur thÃ©orique de p est de : %.3f \n', p_th );
 m3 = sprintf('La valeur de N qui garantit (en moyenne) une precision relative Err_0  est de : %.3f \n', N_perf );
-msgbox({m0, m1, m2, m3},'Résultat du calcul','warn')
+msgbox({m0, m1, m2, m3},'RÃ©sultat du calcul','warn')
 
 
-%% Calcul du volume à l'aide de la méthode de Monté Carlo
+%% Calcul du volume Ã  l'aide de la mÃ©thode de MontÃ© Carlo
 
 function [V, err] = volumeMC(R,n, Vr, range)
 
@@ -70,10 +70,10 @@ function [V, err] = volumeMC(R,n, Vr, range)
     
     for k = range
         
-        point = 2*R*rand(1,n)-R; % Création d'un point (vecteur de coordonnée) dans la boite de coté 2R
+        point = 2*R*rand(1,n)-R; % CrÃ©ation d'un point (vecteur de coordonnÃ©e) dans la boite de cotÃ© 2R
         N_tot = N_tot +1;
         
-        if (norm(point))^2 <= R^2 % vérification si le point est dans l'hypèrshpere
+        if (norm(point))^2 <= R^2 % vÃ©rification si le point est dans l'hypÃ¨rshpere
             N_int = N_int+1;
         end
 
