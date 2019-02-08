@@ -12,12 +12,12 @@ Hydrophile=2;
 Hydrophobe=1;
 
 %matrice des acides aminés
-M=ones(8,8);
+M_AA=ones(8,8);
 for i=1:8
-    M(1,i)=2;
-    M(i,1)=2;
-    M(8,i)=2;
-    M(i,8)=2;
+    M_AA(1,i)=2;
+    M_AA(i,1)=2;
+    M_AA(8,i)=2;
+    M_AA(i,8)=2;
 end
 
 %matrices des voisins cenvention [N,S,E,O]
@@ -49,15 +49,62 @@ for i=3:6
 end
 
 %%%calcul Etot etqt initial
-%Etot0=
+%Etot0 = 1
 
 
 %%boucle 
     %tirage aléatoire
     n=randi(8);
-    m=randi(8);
-            
-
+    m=randi(8);          
+%%changement d'AA  et changement des voisins pour ses voisins
+  %%changement de L'AA
+  if (M(m,n)==1)
+    M(m,n)=2;
+  else
+    M(m,n)=2;
+  end
+  %changements pour les voisins
+  if (m==1)
+    if(n==1)
+      P{m+1,n}{1}= M(m,n); %voisin inférieur
+      P{m,n+1}{4}= M(m,n); %voisin de droite
+    else if(n==8)
+      P{m+1,n}{1}= M(m,n); %voisin inférieur
+      P{m,n-1}{3}= M(m,n); %voisin de gauche
+    else
+      P{m+1,n}{1}= M(m,n); %voisin inférieur
+      P{m,n-1}{3}= M(m,n); %voisin de gauche
+      P{m,n+1}{4}= M(m,n); %voisin de droite
+    end
+  else if (m==8)
+     if (n==1)
+       P{m-1,n}{2}= M(m,n); %voisin supérieur
+       P{m,n+1}{4}= M(m,n); %voisin de droite
+     else if (n==8)
+       P{m-1,n}{2}= M(m,n); %voisin supérieur
+       P{m,n-1}{3}= M(m,n); %voisin de gauche
+     else
+       P{m-1,n}{2}= M(m,n); %voisin supérieur
+      P{m,n-1}{3}= M(m,n); %voisin de gauche
+      P{m,n+1}{4}= M(m,n); %voisin de droite
+      end
+  
+  else if (n==1)
+    P{m+1,n}{1}= M(m,n); %voisin inférieur
+    P{m-1,n}{2}= M(m,n); %voisin supérieur
+    P{m,n+1}{4}= M(m,n); %voisin de droite
+  else if (n==8)
+    P{m+1,n}{1}= M(m,n); %voisin inférieur
+    P{m-1,n}{2}= M(m,n); %voisin supérieur
+    P{m,n-1}{3}= M(m,n); %voisin de gauche
+  else
+    P{m+1,n}{1}= M(m,n); %voisin inférieur
+    P{m-1,n}{2}= M(m,n); %voisin supérieur
+    P{m,n-1}{3}= M(m,n); %voisin de gauche
+    P{m,n+1}{4}= M(m,n); %voisin de droite
+  end
+  
+end 1
 
 
 
