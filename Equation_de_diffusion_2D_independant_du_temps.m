@@ -1,13 +1,13 @@
- % Distribution de la température dans un appartement d'un immeuble de plusieurs étages
+ % Distribution de la tempÃ©rature dans un appartement d'un immeuble de plusieurs Ã©tages
 
 
-% Équation de transfert de chaleur:
+% Ã‰quation de transfert de chaleur:
 % k*(d^2 T(x,y)/dx^2 + d^2 T(x,y)/dy^2)+S=0
 
 
 % Conditions aux limites:
 
-% (1) Condition convective (de Robin) à x=0 et à x=Lx (faces externes du mur):
+% (1) Condition convective (de Robin) Ã  x=0 et Ã  x=Lx (faces externes du mur):
 % -k*dT(x=0,y)/dx=-h*(T-Ta)
 % -k*dT(x=L,y)/dx=h*(T-Ta)
 Ta=-10; %oC
@@ -21,48 +21,48 @@ Lx=4; %[m]
 Ly=2.4;  %[m]
 
 % Parametres d'un mur d'isolation thermique
-Lm=0.4; %m ; Épaisseur du mur en brique
-km=0.85;%W/(m*K); La conductivité thermique de la brique
-h=20; %W/(m^2*K); Coefficient de transfert thermique sur les surfaces extérieures du mur
+Lm=0.4; %m ; Ã‰paisseur du mur en brique
+km=0.85;%W/(m*K); La conductivitÃ© thermique de la brique
+h=20; %W/(m^2*K); Coefficient de transfert thermique sur les surfaces extÃ©rieures du mur
 
-% Paramètres de l'air qui remplit l'appartement
+% ParamÃ¨tres de l'air qui remplit l'appartement
 ka=0.024;
 
 d_ar=[];tini_ar=[];tinv_ar=[];mem_ar=[];Tm_ar=[];
 for fact=[16/12, 8/12, 4/12, 2/12, 1/12]
-    d=0.1*fact; %Pas de discrétisation en [m]
+    d=0.1*fact; %Pas de discrÃ©tisation en [m]
     d_ar=[d_ar d]
     Nx=round(Lx/d)+1;
     Ny=round(Ly/d)+1;
     
     tic
-    % Initialisation de la source de chaleur et de la conductivité thermique
+    % Initialisation de la source de chaleur et de la conductivitÃ© thermique
     S=zeros(Ny,Nx); k=zeros(Ny,Nx);
     for i=1:Ny
         y=(i-1)*d;
         for j=1:Nx
             x=(j-1)*d;
             
-            % Sourse volumique de chaleur q[W/m^3] d'épaisseur dL.
-            % La source est intégrée dans la partie intérieure du mur a x=0 et
+            % Sourse volumique de chaleur q[W/m^3] d'Ã©paisseur dL.
+            % La source est intÃ©grÃ©e dans la partie intÃ©rieure du mur a x=0 et
             % il occupe le tiers du mur dans la direction verticale
             dL=0.1;
             q=1e4;% W/m^3;
             if (x<=Lm)&&(y<=Ly/3)
-                % À l'intérieur de l'élément chauffant
+                % Ã€ l'intÃ©rieur de l'Ã©lÃ©ment chauffant
                 S(i,j)=q*exp(-((x-Lm)/dL).^2);
             else
-                % À l'extérieur de l'élément chauffant
+                % Ã€ l'extÃ©rieur de l'Ã©lÃ©ment chauffant
                 S(i,j)=0;
             end
             
-            % l'espace de vie de l'appartement est délimitée par
-            % les parois d'épaisseur Lm de tous les quatre côtés
+            % l'espace de vie de l'appartement est dÃ©limitÃ©e par
+            % les parois d'Ã©paisseur Lm de tous les quatre cÃ´tÃ©s
             if (x<=Lm)||(x>=(Lx-Lm))||(y<=Lm)||(y>=(Ly-Lm))
-                % À l'intérieur du mur
+                % Ã€ l'intÃ©rieur du mur
                 k(i,j)=km;
             else
-                % À l'intérieurde de l'appartement
+                % Ã€ l'intÃ©rieurde de l'appartement
                 k(i,j)=ka;
             end
         end
@@ -76,36 +76,44 @@ for fact=[16/12, 8/12, 4/12, 2/12, 1/12]
             % remplir la ligne pl de la matrice M
             pl=(i-1)*Nx+j;
             
-            if ((i>1)&(i<Ny))&((j>1)&(j<Nx))
-                % noeud qui est strictement à l'intérieur de la cellule de simulation
+            if ((i>1)&&(i<Ny))&&((j>1)&&(j<Nx))
+                % noeud qui est strictement Ã  l'intÃ©rieur de la cellule de simulation
                 pc=pl;M(pl,pc)=-4; % contribution de noeud (i,j)
                 pc=(i-1)*Nx+j-1;M(pl,pc)=1; % contribution de noeud (i,j-1)
                 pc=(i-1)*Nx+j+1;M(pl,pc)=1; % contribution de noeud (i,j+1)
                 pc=(i-2)*Nx+j;M(pl,pc)=1; % contribution de noeud (i-1,j)
                 pc=(i)*Nx+j;M(pl,pc)=1; % contribution de noeud (i+1,j)
                 b(pl)=-d^2*S(i,j)/k(i,j);
+                
             elseif (i==1)
                 % noeud sur le plafond y=0
-                pc=pl;M(pl,pc)=1; % contribution de noeud (1,j)
+                pc=pl;M(pl,pc)=3+2*d*h/k(i,j); % contribution de noeud (i,1)
+                pc=(i)*Nx+j;M(pl,pc)=-4; % contribution de noeud (i,2)
+                pc=(i+1)*Nx+j;M(pl,pc)=1; % contribution de noeud (i,3)
                 b(pl)=2*d*h*Ta/k(i,j);
+                
             elseif (i==Ny)
                 % noeud sur le plancher y=Ly
-                pc=pl;M(pl,pc)=1; % contribution de noeud (Ny,j)
+                pc=pl;M(pl,pc)=3+2*d*h/k(i,j); % contribution de noeud (i,Nx)
+                pc=(i-2)*Nx+j;M(pl,pc)=-4; % contribution de noeud (i,Nx-1)
+                pc=(i-3)*Nx+j;M(pl,pc)=1; % contribution de noeud (i,Nx-2)
                 b(pl)=2*d*h*Ta/k(i,j);
+
             elseif (j==1)
-                % noeud à la surface externe du mur x=0
+                % noeud Ã  la surface externe du mur x=0
                 pc=pl;M(pl,pc)=3+2*d*h/k(i,j); % contribution de noeud (i,1)
                 pc=(i-1)*Nx+j+1;M(pl,pc)=-4; % contribution de noeud (i,2)
                 pc=(i-1)*Nx+j+2;M(pl,pc)=1; % contribution de noeud (i,3)
                 b(pl)=2*d*h*Ta/k(i,j);
+                
             elseif (j==Nx)
-                % noeud à la surface externe du mur x=Nx
+                % noeud Ã  la surface externe du mur x=Nx
                 pc=pl;M(pl,pc)=3+2*d*h/k(i,j); % contribution de noeud (i,Nx)
                 pc=(i-1)*Nx+j-1;M(pl,pc)=-4; % contribution de noeud (i,Nx-1)
                 pc=(i-1)*Nx+j-2;M(pl,pc)=1; % contribution de noeud (i,Nx-2)
                 b(pl)=2*d*h*Ta/k(i,j);
             else
-                display('Erreur dans la définition de la matrice de coefficients');
+                display('Erreur dans la dÃ©finition de la matrice de coefficients');
             end
         end
     end
