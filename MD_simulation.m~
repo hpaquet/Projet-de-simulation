@@ -8,9 +8,7 @@ N = length(protein);
 %% première itération
 
 for n = 1:N % ensemble des AA
-    F = Force();
-    protein(2*n-1,2) = 2*V(10)/V(4)*F(1) + 2*V(10)*sqrt(2*V(0.2))*V(7) + protein(2*n-1,1) - V(10)*vo;
-    protein(2*n,2) = 2*V(10)/V(4)*F(2) + 2*V(10)*sqrt(2*V(0.2))*V(7) + protein(2*n-1,1) - V(10)*vo;
+    protein(2*n) = 2*V(10)/V(4)*Force() + 2*V(10)*sqrt(2*V(0.2))*V(7) + protein(2*n-1,1) - V(10)*vo
 end
 
 %% boucle principal

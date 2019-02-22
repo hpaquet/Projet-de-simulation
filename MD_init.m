@@ -19,13 +19,13 @@ movie    = false;        % Création d'un fichier video si égale true
 
 %% Initialisation
 
-r0      = 2^(1/6)*d;    % distance à l'équilibre entre les AA lié
 epsi = [1 0.2; 0.2 -1]; % matrice d'interaction entre les AA
 type = randi(2,1,N); % type d'AA dans la chaine 2 pour hydrophile et 1 pour hydrophobe
 
 
-V = [N T m g D d xi rayon r0 dt];
+V = [N T m g D d xi rayon dt];
 
 protein = zeros(2*N,duration);
+v0 = random_maxboltz(T,N,m);
 
 MD_simulation(protein, duration)
