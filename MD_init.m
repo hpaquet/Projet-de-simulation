@@ -26,8 +26,6 @@ type = randi(2,1,N); % type d'AA dans la chaine 2 pour hydrophile et 1 pour hydr
 
 V = [N T m g D d xi rayon r0 dt];
 
-for n = 1:N
-   protein(n) = AA(type(n), n,0);
-end
+protein = zeros(2*N,duration);
 
-MD_simulation(protein, duration, movie, fps)
+MD_simulation(protein, duration)
