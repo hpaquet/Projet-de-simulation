@@ -1,27 +1,34 @@
-function [  ] = MD_simulation(protein, duration)
+function protein = MD_simulation(protein, type, duration, v0)
 
-global V;
+global V epsi;
 
-N = length(protein);
+N = size(protein,2)/2;
 
 
 %% première itération
 
 for n = 1:N % ensemble des AA
-    protein(2*n) = 2*V(10)/V(4)*Force() + 2*V(10)*sqrt(2*V(0.2))*V(7) + protein(2*n-1,1) - V(10)*vo
+    [Fx, Fy] = sum_force( protein, type, n, V, 1, epsi);
+    
+    protein(2,2*n-1) = 2*V(9)/V(4)*Fx + 2*V(9)*sqrt(2*V(5))*V(7) + protein(1,2*n-1) - V(9)*v0(n);
+    protein(2,2*n) = 2*V(9)/V(4)*Fy + 2*V(9)*sqrt(2*V(5))*V(7) + protein(1,2*n) - V(9)*v0(n);
 end
 
 %% boucle principal
 
-for t = 2:duration % variation dans le temps
-    
+for t = 3:duration % variation dans le temps
     
     for n = 1:N % ensemble des AA
         
+        [Fx, Fy] = sum_force( protein, type, n, V, t, epsi);
         
-    end
-end
+        protein(t,2*n-1) = 2*V(9)/V(4)*Fx + 2*V(9)*sqrt(2*V(5))*V(7) + protein(t-1,2*n-1);
+        protein(t,2*n) = 2*V(9)/V(4)*Fy + 2*V(9)*sqrt(2*V(5))*V(7) + protein(t-1,2*n);
 
+        disp(t)
+    end
+    
+end
 
 end
 
