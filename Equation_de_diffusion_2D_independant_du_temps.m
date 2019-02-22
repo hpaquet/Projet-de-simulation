@@ -134,12 +134,20 @@ end
 
 %%
 
-[A1 p1] = polyfit(log(d_ar),log(mem_ar),1);
-[A2 p2] = polyfit(log(d_ar),log(tinv_ar),1);
-[A3 p3] = polyfit(log(d_ar),log(tini_ar),1);
-[A4 p4] = polyfit(log(d_ar(2:end)),log(abs(Tm_ar(2:end)-Tm_ar(1:end-1))),1);
+A1 = polyfit(log(d_ar),log(mem_ar),1);
+A2 = polyfit(log(d_ar),log(tinv_ar),1);
+A3  = polyfit(log(d_ar),log(tini_ar),1);
+A4  = polyfit(log(d_ar(2:end)),log(abs(Tm_ar(2:end)-Tm_ar(1:end-1))),1);
 
 %%
+
+d_max = ((128*1024^3)/A1(2))^(1/A1(1));
+t_init = A3(2)*d_max^A3(1);
+t_inv = A2(2)*d_max^A2(1);
+err = A4(2)*d_max^A4(1);
+
+%%
+
 figure(1)
 h=pcolor((0:d:Lx),(0:d:Ly),S);set(h,'LineStyle','none')
 colorbar
