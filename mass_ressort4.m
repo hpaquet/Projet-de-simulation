@@ -1,28 +1,41 @@
-clear all;close all; clc;
+clc;close all;clear all;
 %%
+
+global KEY_IS_PRESSED
+KEY_IS_PRESSED = 0;
+gcf;
+set(gcf, 'KeyPressFcn', @myKeyPressFcn);
+
+%%
+
 m = 1;
 
-k = 5;
+k = 10;
+
 dt = 0.1;
 l = 2;
 g = 0;
-xi = 1;
-D = 1;
+xi = 0;
+D = 0;
 
-N=64;
+N=4;
 
 for n = 1:N
-    x(1,n) = 2*(n);
+    x(1,n) = 2*(0.1*n);
     v0(1,n) = (-1)^n;
 end
-% x = [-1 1];
-r= 3;
-h=plot(0,0,'MarkerSize',100,'Marker','.');
-axis([-0 100 -1 1]);
-set(gca,'nextplot','replacechildren');
 
+
+subplot(2,1,1)
+h=plot(0,0,'MarkerSize',100,'Marker','.');
+axis([-8 8 -1 1]);
+set(gca,'nextplot','replacechildren');
+subplot(2,1,2)
+for i =1:N
+    pl(i) = animatedline('color',rand(1,3));
+end
+axis([0 100 -10 10]);
 %%
-% x(end+1,:) =  2*dx*force(x(end,1),x(end,2),k,l) - dx*v0 ;
 for n = 1:N
     C = 1/(4*m);
     C1 = C*4*m;
@@ -32,12 +45,12 @@ for n = 1:N
 end
 
 set(h,'XData',x(end,:),'YData',zeros(1,N));
+
 drawnow;
 %%
 
-for t = 2:10000
+for t = 2:1000
     
-    %     x(end+1,:) = 2*force(x(end,1),x(end,2),k,l)*dx - x(end-1,:);
     for n =1:N
         C = 1/(2*m-g*dt);
         C1 = C*4*m;
@@ -49,8 +62,18 @@ for t = 2:10000
     end
     
     set(h,'XData',x(end,:),'YData',zeros(1,N));
+    
+    for i = 1:N
+        addpoints(pl(i),t,x(end,i));
+    end
+    axis([t-20 20+t -10 10]);
     pause(0.1)
     drawnow;
+    
+    if KEY_IS_PRESSED
+        close all;
+        break;
+    end
     
 end
 
@@ -58,19 +81,23 @@ end
 
 %%
 
-plot(x)
-
 %%
 
 function F = force(x,n,k,a)
-    
-    F = 0;
-    
-    if n-1 >= 1
-        F = F + k*(x(n-1)-x(n)+a);
-    end
-    if n+1 <= length(x)
-        F = F - k*(x(n)-x(n+1)+a);
-    end
-    
+
+F = 0;
+
+if n-1 >= 1
+    F = F + k*(x(n-1)-x(n)+a);
+end
+if n+1 <= length(x)
+    F = F - k*(x(n)-x(n+1)+a);
+end
+
+end
+
+
+function myKeyPressFcn(hObject, event)
+global KEY_IS_PRESSED
+    KEY_IS_PRESSED  = 1;
 end
