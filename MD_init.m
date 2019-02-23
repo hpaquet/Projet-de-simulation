@@ -11,7 +11,7 @@ a       = 1;            % distance à potentiel null
 xi     = 0;            % bruit thermique (bruit gaussien)
 rayon   = 1;            % rayon
 
-dt      = 0.001;         % pas de temps
+dt      = 0.01;         % pas de temps
 
 duration = 1000;         % temps de la simulation
 fps      = 10;          % image par seconde
@@ -28,7 +28,7 @@ V = [N T m g D a xi rayon dt];
 protein = zeros(duration,2*N);
 
 for n = 1:N
-   protein(1,2*n-1) = n*a+(-1)^n;
+   protein(1,2*n-1) = n*a;
 end
 
 %v0 = random_maxboltz(T,N,m);
