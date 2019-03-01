@@ -1,5 +1,10 @@
 clc;close all;clear all;
 %%
+% 
+% 
+% 
+%
+%%
 
 global KEY_IS_PRESSED
 KEY_IS_PRESSED = 0;
@@ -8,34 +13,39 @@ set(gcf, 'KeyPressFcn', @myKeyPressFcn);
 
 %%
 
-m = 10;
-
-k = 10;
-
-dt = 0.1;
-l = 2;
-g = 0;
+m = 1;
+kb = 1.38e-23;
+k = 1;
+T = 300;
+dt = 0.01;
+l = 3;
+g = 0;%2.414e-5*10^(247.8/(T-140));
 xi = 0;
-D = 0;
+D = 0;%kb*T/g;
 
-N=64;
+N= 2;
 
 for n = 1:N
-    x(1,n) = 2*(n);
-    y(1,n) = 0;
-    v0(1,n) = (-1)^n;
-    v0(2,n) = (-1)^(n-1);
+    x(1,n) = 2*n;
+    y(1,n) = 0;%2*(n-1);
+    v0(1,n) = 0;%(-1)^(n);
+    v0(2,n) = 0;
 end
 
-% subplot(2,1,1)
+subplot(2,2,1:2)
 h=plot(0,0,'MarkerSize',100,'Marker','.','LineWidth',5);
-axis([0 100 -100 100]);
+axis([-N 4*N -5 10]);
 set(gca,'nextplot','replacechildren');
-% subplot(2,1,2)
-% for i =1:N
-%     pl(i) = animatedline('color',rand(1,3));
-% end
-% axis([0 100 -0 10]);
+subplot(2,2,3)
+for i =1:N
+    pl1(i) = animatedline('color',rand(1,3));
+end
+axis([0 100 -0 10]);
+subplot(2,2,4)
+for i =1:N
+    pl2(i) = animatedline('color',rand(1,3));
+end
+axis([0 100 -5 10]);
 %%
 
 for n = 1:N
@@ -53,27 +63,34 @@ drawnow;
 
 %%
 
-for t = 2:1000
+for t = 2:10000
     
     for n =1:N
         C = 1/(2*m-g*dt);
         C1 = C*4*m;
         C2 = -C*(2*m+g*dt);
-        C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,l));
-           
-        x(t+1,n) = C1.*x(t,n) + C3(1) + C2*x(t-1,n);
-        y(t+1,n) = C1.*y(t,n) + C3(2) + C2*y(t-1,n);
+        C3 = C*( 2*g*sqrt(2*D)*randn(1)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,l));
+        
+        x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2*x(t-1,n),3);
+        y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2*y(t-1,n),3);
         
     end
     
     set(h,'XData',x(end,:),'YData',y(end,:));
     
-%     for i = 1:N
-%         addpoints(pl(i),t,x(end,i));
-%     end
+    for i = 1:N
+        addpoints(pl1(i),t,y(end,i));
+        axis([t-20 20+t -0 10]);
+    end
     
-%     axis([t-20 20+t -0 10]);
-    pause(0.1)
+    
+    for i = 1:N
+        addpoints(pl2(i),t,x(end,i));
+        axis([t-20 20+t -5 10]);
+    end
+    
+    
+    %pause(0.1)
     drawnow;
     
     if KEY_IS_PRESSED
@@ -89,35 +106,50 @@ end
 function F = force(x,y,n,a)
 
 F = [0 0];
-
-if n-1 >= 1
-    dx = x(n-1)-x(n);
-    dy = y(n-1)-y(n);
-    
-    theta = atan(y/x);
-    r = sqrt(dx^2+dy^2);
-    delta = r-a;
-    
-    k = LenardJones(a,delta,1,2);
-    
-    F(1) = F(1) + k*(dx+delta*cos(theta));
-    F(2) = F(2) + k*(dy+delta*sin(theta));
+for i = 1:length(x)
+    if i == n-1
+        dx = x(i)-x(n);
+        dy = y(i)-y(n);
+        
+        theta = atan2(dy,dx);
+        
+        r = sqrt(dx^2+dy^2);
+        delta = r-a;
+        
+        k = LenardJones(a,delta,1,2)*10;
+        
+        F(1) = F(1) + k*((delta)*cos(theta));
+        F(2) = F(2) + k*((delta)*sin(theta));
+        
+    elseif i == n+1
+        dx = x(n)-x(i);
+        dy = y(n)-y(i);
+        
+        theta = atan2(dy,dx);
+        
+        r = sqrt(dx^2+dy^2);
+        delta = r-a;
+        
+        k = LenardJones(a,delta,1,2)*10;
+        
+        F(1) = F(1) - k*((delta)*cos(theta));
+        F(2) = F(2) - k*((delta)*sin(theta));
+        
+    elseif i ~= n
+        dx = x(n)-x(i);
+        dy = y(n)-y(i);
+        
+        theta = atan2(dy,dx);
+        
+        r = sqrt(dx^2+dy^2);
+        delta = r-a;
+        
+        f = LenardJones(a,delta,1,1);
+        
+        F(1) = F(1) - f*cos(theta);
+        F(2) = F(2) - f*sin(theta);
+    end
 end
-
-if n+1 <= length(x)
-    dx = x(n)-x(n+1);
-    dy = y(n)-y(n+1);
-    
-    theta = atan(y/x);
-    r = sqrt(dx^2+dy^2);
-    delta = r-a;
-    
-    k = LenardJones(a,delta,1,2);
-    
-    F(1) = F(1) - k*(dx+delta*cos(theta));
-    F(2) = F(2) - k*(dy+delta*sin(theta));
-end
-
 end
 
 

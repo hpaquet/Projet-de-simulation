@@ -1,5 +1,11 @@
 clc;close all;clear all;
 %%
+% Fonctionne parfaitement
+%
+%
+%
+%%
+
 
 global KEY_IS_PRESSED
 KEY_IS_PRESSED = 0;
@@ -12,29 +18,36 @@ m = 1;
 
 k = 10;
 
-dt = 0.1;
-l = 2;
+dt = 0.01;
+l = 4;
 g = 0;
 xi = 0;
 D = 0;
 
-N=4;
+N=2;
 
 for n = 1:N
-    x(1,n) = 2*(0.1*n);
-    v0(1,n) = (-1)^n;
+    x(1,n) = (n-randi([0,1]));
+    v0(1,n) = 0;%(-2)^n;
 end
 
 
 subplot(2,1,1)
 h=plot(0,0,'MarkerSize',100,'Marker','.');
-axis([-8 8 -1 1]);
+axis([-8 15 -1 1]);
 set(gca,'nextplot','replacechildren');
+
 subplot(2,1,2)
 for i =1:N
     pl(i) = animatedline('color',rand(1,3));
 end
-axis([0 100 -10 10]);
+
+% pl(end+1) = animatedline('color',rand(1,3));
+% pl(end+1) = animatedline('color',rand(1,3));
+
+axis([0 100 -inf inf]);
+
+
 %%
 for n = 1:N
     C = 1/(4*m);
@@ -66,8 +79,12 @@ for t = 2:1000
     for i = 1:N
         addpoints(pl(i),t,x(end,i));
     end
-    axis([t-20 20+t -10 10]);
-    pause(0.1)
+%     y1 = 1/2*(  cos(sqrt(2*k/m)*t*dt) + cos(-sqrt(2*k/m)*t*dt)   ) -1;
+%     y2 = -1/2*(  cos(sqrt(2*k/m)*t*dt) + cos(-sqrt(2*k/m)*t*dt)  ) +3;
+%     addpoints(pl(end-1),t, y1 );
+%     addpoints(  pl(end),t, y2 );
+    axis([t-20 20+t -inf inf]);
+    %pause(0.1)
     drawnow;
     
     if KEY_IS_PRESSED
@@ -79,7 +96,6 @@ end
 
 
 
-%%
 
 %%
 
@@ -88,7 +104,7 @@ function F = force(x,n,k,a)
 F = 0;
 
 if n-1 >= 1
-    F = F + k*(x(n-1)-x(n)+a);
+    F = F - k*(x(n)-x(n-1)-a);
 end
 if n+1 <= length(x)
     F = F - k*(x(n)-x(n+1)+a);
