@@ -12,32 +12,32 @@ m = 1;
 
 k = 1;
 
+kb = 1.38e-23;
 dt = 0.1;
 l = 2;
 g = 0;
 xi = 0;
 D = 0;
 
-N=2;
+N=10;
+
+T = [];
 
 for n = 1:N
-    x(1,n) = n;
-    y(1,n) = 0;
-    v0(1,n) = (-1)^(n-1);%(-1)^n;
-    v0(2,n) = 0;
+    x(1,n) = randi(10);
+    y(1,n) = randi(10);
+    v0(1,n) = (-1)^(randi(N));
+    v0(2,n) = (-1)^(randi(N));
 end
 
-% subplot(2,1,1)
-
-h=plot(0,0,'MarkerSize',100,'Marker','.','LineWidth',5);
-axis([-10 20 -5 5]);
+figure(1)
+h1=plot(0,0,'MarkerSize',100,'Marker','.','LineWidth',5);
+axis([-10 20 -10 10]);
 set(gca,'nextplot','replacechildren');
+figure(2)
+h2=animatedline;
 
-% subplot(2,1,2)
-% for i =1:N
-%     pl(i) = animatedline('color',rand(1,3));
-% end
-% axis([0 100 -0 10]);
+
 %%
 
 for n = 1:N
@@ -51,7 +51,7 @@ for n = 1:N
     
 end
 
-set(h,'XData',x(end,:),'YData',y(end,:));
+set(h1,'XData',x(end,:),'YData',y(end,:));
 
 drawnow;
 
@@ -71,14 +71,10 @@ for t = 2:10000
         
     end
     
-    set(h,'XData',x(end,:),'YData',y(end,:));
+    T = temperature(x,y,N,kb,dt,m);
+    addpoints(h2,t,T);
+    set(h1,'XData',x(end,:),'YData',y(end,:));
     
-    %     for i = 1:N
-    %         addpoints(pl(i),t,x(end,i));
-    %     end
-    
-    %     axis([t-20 20+t -0 10]);
-    %pause(0.1)
     drawnow;
     
     if KEY_IS_PRESSED
@@ -124,6 +120,27 @@ if n+1 <= length(x)
     F(2) = F(2) - k*((delta)*sin(theta));
     
 end
+
+end
+
+
+function T = temperature(x,y,N,k,dt,m)
+
+T = 0;
+C = m/(8*k*N*dt^2);
+
+for i = 1:N
+    
+    vx = 3*x(end,i)-4*x(end-1,i)+x(end-2,i);
+    vy = 3*y(end,i)-4*y(end-1,i)+y(end-2,i);
+    
+    v2 = vx^2+vy^2;
+    
+    T = T + v2;
+    
+end
+
+T = C*T;
 
 end
 

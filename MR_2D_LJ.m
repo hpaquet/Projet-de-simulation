@@ -1,10 +1,6 @@
 clc;close all;clear all;
 %%
-% 
-% 
-% 
-%
-%%
+
 
 global KEY_IS_PRESSED
 KEY_IS_PRESSED = 0;
@@ -19,11 +15,11 @@ k = 1;
 T = 300;
 dt = 0.01;
 l = 3;
-g = 0;%2.414e-5*10^(247.8/(T-140));
+g = 0;
 xi = 0;
-D = 0;%kb*T/g;
+D = 0;
 
-N= 4;
+N= 3;
 
 for n = 1:N
     x(1,n) = 2*n;
@@ -146,12 +142,12 @@ for i = 1:length(x)
         
         f = LenardJones(a,delta,1,1);
         
-        F(1) = F(1) - f*cos(theta);
-        F(2) = F(2) - f*sin(theta);
+        F(1) = 0;%F(1) - f*cos(theta);
+        F(2) = 0;%F(2) - f*sin(theta);
     end
 end
 end
-
+%%
 
 function myKeyPressFcn(hObject, event)
 global KEY_IS_PRESSED
