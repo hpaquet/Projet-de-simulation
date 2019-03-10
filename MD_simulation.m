@@ -1,48 +1,44 @@
-function protein = MD_simulation(protein, type, duration, v0)
+function [  ] = MD_simulation(protein, duration, movie, fps)
 
-global V epsi;
+global V;
 
-N = size(protein,2)/2;
-r = 3;
-h=plot(0,0,'MarkerSize',100,'Marker','.');
-axis([-1 3 -1 1]);
-set(gca,'nextplot','replacechildren');
+N = length(protein);
 
+t_max = duration*fps;
+
+X(1,:) = [protein().positionx];
+Y(1,:) = [protein().positiony];
 
 %% première itération
 
-% for n = 1:N % ensemble des AA
-%     [Fx, Fy] = sum_force( protein, type, n, V, 1, epsi);
-%     
-%     protein(2,2*n-1) = 2*V(9)/V(4)*Fx + 2*V(9)*sqrt(2*V(5))*V(7) + protein(1,2*n-1) - V(9)*v0(n);
-%     protein(2,2*n) = 2*V(9)/V(4)*Fy + 2*V(9)*sqrt(2*V(5))*V(7) + protein(1,2*n) - V(9)*v0(n);
-% end
-protein(2,[1 3]) = [1 -1]*2*V(9)/V(4)*( - ( protein(1,1)-protein(1,3)-V(6) ) ) + 2*V(9)*sqrt(2*V(5))*V(7) + protein(1,[1 3])- V(9)*v0;
-
+for n = 1:N % ensemble des AA
+    r = (2*V(10)/V(4))*protein(n).force(protein) + 2*V(10)*sqrt(2*V(5))*V(7)+protein(n).position() - V(10)*protein(n).v0;
+    protein(n).positionx = protein(n).positionx + r(1);
+    protein(n).positiony = protein(n).positiony + r(2);
+end
 
 %% boucle principal
 
-% V = [N T m g D a xi rayon dt];
+for t = 2:t_max % variation dans le temps
+    
+    X(t,:) = [protein().positionx];
+    Y(t,:) = [protein().positiony];
+    
+    for n = 1:N % ensemble des AA
+        
+        r = (2*V(10)/V(4))*protein(n).force(protein) + 2*V(10)*sqrt(2*V(5))*V(7)+protein(n).position() + [X(t-1,n);Y(t-1,n)];
+        protein(n).positionx = protein(n).positionx + r(1);
+        protein(n).positiony = protein(n).positiony + r(2);
+        
+    end
+end
 
-for t = 3:duration % variation dans le temps
-    
-    %for n = 1:N % ensemble des AA
-        
-        %[Fx, Fy] = sum_force( protein, type, n, V, t-1, epsi);
-        
-        %protein(t,2*n-1) = 1/(2*V(3)-V(4)*V(9))*(4*V(3)*protein(t,2*n-1))
-        %protein(t,2*n-1) = 2*V(9)/V(4)*Fx + 2*V(9)*sqrt(2*V(5))*V(7) + protein(t-2,2*n-1);
-        %protein(t,2*n) = 2*V(9)/V(4)*Fy + 2*V(9)*sqrt(2*V(5))*V(7) + protein(t-2,2*n);
-            
-        protein(t,[1 3]) = [1 -1]*2*V(9)/V(4)*( - ( protein(t,1)-protein(t,3)-V(6) ) ) + 2*V(9)*sqrt(2*V(5))*V(7) + protein(t-2,[1 3]);
-        
-        
-    %end
-    
-    set(h,'XData',[protein(t,1) protein(t,3)],'YData',[0,0]);
-    drawnow;
-    pause(0.1)
-%     
+%% Création d'un fichier vidéo externe
+if movie==true
+    video = VideoWriter('MD_simulation.avi');
+    video.FrameRate = fps;
+    open(video)
+    writeVideo(video,F);
 end
 
 end

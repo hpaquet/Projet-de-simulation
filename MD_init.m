@@ -5,35 +5,29 @@ global V epsi;
 N       = 2;           % nombre d'AA
 T       = 300;          % température
 m       = 2.5e-25;      % masse d'un AA en Kg
-g       = 1;            % gamma - coefficient de viscosité
+g       = 0.5;            % gamma - coefficient de viscosité
 D       = 0.2;            % Coefficient de difusion
-a       = 1;            % distance à potentiel null
-xi     = 0;            % bruit thermique (bruit gaussien)
+d       = 1;            % distance à potentiel null
+xi     = 1;            % bruit thermique (bruit gaussien)
 rayon   = 1;            % rayon
 
-dt      = 0.01;         % pas de temps
+dt      = 0.001;         % pas de temps
 
-duration = 1000;         % temps de la simulation
+duration = 100;         % temps de la simulation
 fps      = 10;          % image par seconde
 movie    = false;        % Création d'un fichier video si égale true
 
 %% Initialisation
 
+r0      = 2^(1/6)*d;    % distance à l'équilibre entre les AA lié
 epsi = [1 0.2; 0.2 -1]; % matrice d'interaction entre les AA
 type = randi(2,1,N); % type d'AA dans la chaine 2 pour hydrophile et 1 pour hydrophobe
 
 
-V = [N T m g D a xi rayon dt];
-
-protein = zeros(duration,2*N);
+V = [N T m g D d xi rayon r0 dt];
 
 for n = 1:N
-   protein(1,2*n-1) = n*a;
+   protein(n) = AA(type(n), n,0);
 end
 
-%v0 = random_maxboltz(T,N,m);
-
-v0 = zeros(1,N);
-
-
-MD_simulation(protein, type, duration, v0);
+MD_simulation(protein, duration, movie, fps)
