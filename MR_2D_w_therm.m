@@ -8,18 +8,18 @@ set(gcf, 'KeyPressFcn', @myKeyPressFcn);
 
 %%
 
-m = 1;
+m = 10;
 
 k = 1;
 
 kb = 1.38e-23;
 dt = 0.1;
 l = 2;
-g = 0;
-xi = 0;
-D = 0;
+g = 1e-6;
+xi = 1;
+D = 1/g;
 
-N=10;
+N=2;
 
 T = [];
 
@@ -42,6 +42,8 @@ h2=animatedline;
 
 for n = 1:N
     
+    xi = normrnd(0,1);
+    
     C = 1/(4*m);
     C1 = C*4*m;
     C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,k,l));
@@ -60,6 +62,8 @@ drawnow;
 for t = 2:10000
     
     for n =1:N
+        
+        xi = normrnd(0,1);
         
         C = 1/(2*m-g*dt);
         C1 = C*4*m;

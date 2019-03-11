@@ -12,16 +12,18 @@ m = 1;
 
 k = 1;
 
-kb = 1;%1.38e-23;
-dt = 0.01;
-l = 2;
-g = 0;
-xi = 0;
-D = 0;
+kb = 1.38e-23;
+dt = 0.001;
+l = 1;
+g = 1e-6;
+xi = 1;
+D = 1/g;
 
-N=10;
+N=3;
 
-T = []; 
+i = 0;
+
+T = [];
 
 for n = 1:N
     x(1,n) = randi(10);
@@ -30,9 +32,13 @@ for n = 1:N
     v0(2,n) = (-1)^(randi(N));
 end
 
-figure(1)
+xx = 20;
+yy = 20;
+
+figure(1);
+f1 = subplot(1,1,1);
 h1=plot(0,0,'MarkerSize',100,'Marker','.','LineWidth',5);
-%axis([-50 50 -50 50]);
+axis(f1,[-xx xx -yy yy]);
 set(gca,'nextplot','replacechildren');
 figure(2)
 h2=animatedline;
@@ -41,6 +47,8 @@ h2=animatedline;
 %%
 
 for n = 1:N
+    
+    xi = normrnd(0,1);
     
     C = 1/(4*m);
     C1 = C*4*m;
@@ -61,6 +69,8 @@ for t = 2:10000
     
     for n =1:N
         
+        xi = normrnd(0,1);
+        
         C = 1/(2*m-g*dt);
         C1 = C*4*m;
         C2 = -C*(2*m+g*dt);
@@ -72,10 +82,17 @@ for t = 2:10000
     end
     
     T = temperature(x,y,N,kb,dt,m);
-    addpoints(h2,t,T);
-    set(h1,'XData',x(end,:),'YData',y(end,:));
+    [xs,ys] = mc(x,y,N);
     
-    drawnow;
+    if mod(i,50) == 0
+        addpoints(h2,t,T);
+
+        set(h1,'XData',x(end,:),'YData',y(end,:));
+        axis(f1,[-xx+xs xx+xs -yy+ys yy+ys]);
+
+        drawnow;
+    
+    end
     
     if KEY_IS_PRESSED
         close all;
@@ -86,6 +103,12 @@ end
 
 
 %%
+
+function [xs,ys] = mc(x,y,N)
+    xs = sum(x(end,:))/N;
+    ys = sum(y(end,:))/N;
+end
+
 
 function F = force(x,y,n,a)
 
@@ -101,7 +124,7 @@ for i = 1:length(x)
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        k = LenardJones(a,delta,1,2)*10;
+        k = LenardJones(a,delta,10,2);
         
         F(1) = F(1) + k*((delta)*cos(theta));
         F(2) = F(2) + k*((delta)*sin(theta));
@@ -115,7 +138,7 @@ for i = 1:length(x)
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        k = LenardJones(a,delta,1,2)*10;
+        k = LenardJones(a,delta,10,2);
         
         F(1) = F(1) - k*((delta)*cos(theta));
         F(2) = F(2) - k*((delta)*sin(theta));
