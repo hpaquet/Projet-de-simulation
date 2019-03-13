@@ -1,50 +1,61 @@
 clc;close all;clear all;
-%%
-
 global KEY_IS_PRESSED
 KEY_IS_PRESSED = 0;
 gcf;
 set(gcf, 'KeyPressFcn', @myKeyPressFcn);
+close all;
 
-%%
+%% Pramètres de simulation
 
 m = 1;
 
 k = 1;
 
 kb = 1.38e-23;
-dt = 0.001;
+dt = 0.0006;
 l = 1;
-g = 1e-6;
+g = 1e-20;
 xi = 1;
 D = 1/g;
+alp2 = 1;
+
+T0 = 1;
+tmax = 2;
 
 N=3;
 
-i = 0;
+
+%% Paramètre graphique
 
 T = [];
+xx = 10;
+yy = 10;
+
+figure('Name','Dynamique moléculaire','Position', [ 50 50 1200 600 ],'NumberTitle','off');
+f1 = subplot(1,2,1);
+h1=plot(0,0,'MarkerSize',100,'Marker','.','LineWidth',5);
+axis off
+axis(f1,[-xx xx -yy yy])
+set(gca,'nextplot','replacechildren')
+subplot(1,2,2)
+h2=animatedline;
+
+
+%% Conditions initiale
 
 for n = 1:N
     x(1,n) = randi(10);
     y(1,n) = randi(10);
-    v0(1,n) = (-1)^(randi(N));
-    v0(2,n) = (-1)^(randi(N));
+    v0(1,n) = -1+2*rand(1);
+    v0(2,n) = -1+2*rand(1);
 end
 
-xx = 20;
-yy = 20;
-
-figure(1);
-f1 = subplot(1,1,1);
-h1=plot(0,0,'MarkerSize',100,'Marker','.','LineWidth',5);
-axis(f1,[-xx xx -yy yy]);
-set(gca,'nextplot','replacechildren');
-figure(2)
-h2=animatedline;
+x = [9 7 4 ];
+y = [8 9 6];
+v0 = [-0.6 0.5 -0.5; -0.2 1 0.7];
 
 
-%%
+%% Première itération (t = 1)
 
 for n = 1:N
     
@@ -59,21 +70,21 @@ for n = 1:N
     
 end
 
-set(h1,'XData',x(end,:),'YData',y(end,:));
 
-drawnow;
+%% Boucle principale (pour t>1)
 
-%%
+t = 2;
 
-for t = 2:10000
+while(true)
     
+    % Mise à jour des positions
     for n =1:N
         
         xi = normrnd(0,1);
         
-        C = 1/(2*m-g*dt);
+        C = 1/(2*m-alp2*g*dt);
         C1 = C*4*m;
-        C2 = -C*(2*m+g*dt);
+        C2 = -C*(2*m+alp2*g*dt);
         C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,l));
         
         x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2*x(t-1,n),3);
@@ -81,32 +92,52 @@ for t = 2:10000
         
     end
     
-    T = temperature(x,y,N,kb,dt,m);
-    [xs,ys] = mc(x,y,N);
     
-    if mod(i,50) == 0
-        addpoints(h2,t,T);
-
-        set(h1,'XData',x(end,:),'YData',y(end,:));
-        axis(f1,[-xx+xs xx+xs -yy+ys yy+ys]);
-
+    %  Mise à jour des graphique à tout les 20 images
+    if mod(t,100) == 0
+        
+        T = temperature(x,y,N,kb,dt,m); % calcul de la température du système
+        [xs,ys] = mc(x,y,N); % calcul du centre de masse
+        
+        addpoints(h2,t,T); % maj de T
+        
+        set(h1,'XData',x(end,:),'YData',y(end,:)); % maj des positions
+        axis(f1,[-xx+xs xx+xs -yy+ys yy+ys]); % maj des axes
+        
         drawnow;
-    
+        
     end
+    
+    
+    % Paramètre du thermostat
+    if T > tmax
+        alp2 = sqrt(T0/T);
+        for n =1:N
+         
+            x(t+1,n) = round(alp2*(x(t,n) - x(t-2,n) ) + x(t-1,n),3);
+            y(t+1,n) = round(alp2*(y(t,n) - y(t-2,n) ) + y(t-1,n),3);
+            
+        end
+        alp2 = 1;
+    else; alp2 = 1;
+    end
+    
+    t = t+1;
+    
+    
     
     if KEY_IS_PRESSED
         close all;
         break;
     end
-    
 end
 
 
-%%
+%% Fonctions
 
 function [xs,ys] = mc(x,y,N)
-    xs = sum(x(end,:))/N;
-    ys = sum(y(end,:))/N;
+xs = sum(x(end,:))/N;
+ys = sum(y(end,:))/N;
 end
 
 
@@ -152,7 +183,7 @@ for i = 1:length(x)
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        f = LenardJones(a,delta,-0.3,1);
+        f = LenardJones(a,delta,-10,1);
         
         F(1) = F(1) - f*cos(theta);
         F(2) = F(2) - f*sin(theta);
@@ -165,7 +196,8 @@ end
 function T = temperature(x,y,N,k,dt,m)
 
 T = 0;
-C = m/(8*k*N*dt^2);
+C = m/(8*1*N*dt^2);
+%C = m/(8*k*N*dt^2);
 
 for i = 1:N
     
@@ -182,6 +214,7 @@ T = C*T;
 
 end
 
+%%
 
 function myKeyPressFcn(hObject, event)
 global KEY_IS_PRESSED
