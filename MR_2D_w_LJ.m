@@ -14,15 +14,15 @@ k = 1;
 kb = 1.38e-23;
 dt = 0.0006;
 l = 1;
-g = 1e-20;
+g = 1e-12;
 xi = 1;
 D = 1/g;
 alp2 = 1;
 
-T0 = 1;
-tmax = 2;
+T0 = 100;
+tmax = 2000;
 
-N=3;
+N=10;
 
 
 %% Paramètre graphique
@@ -43,16 +43,20 @@ h2=animatedline;
 
 %% Conditions initiale
 
+global TYP
+TYP = [];
+
 for n = 1:N
+    TYP(end+1) = mod(n,2); 
     x(1,n) = randi(10);
     y(1,n) = randi(10);
     v0(1,n) = -1+2*rand(1);
     v0(2,n) = -1+2*rand(1);
 end
-
-x = [9 7 4 ];
-y = [8 9 6];
-v0 = [-0.6 0.5 -0.5; -0.2 1 0.7];
+% 
+% x = [2 6 10  10 5];
+% y = [2 10 9 6 2];
+% v0 = [1 0.5 1 0.2 1; 0.3 0.3 -0.7 -0.6 0.5];
 
 
 %% Première itération (t = 1)
@@ -75,16 +79,18 @@ end
 
 t = 2;
 
+C = 1/(2*m-alp2*g*dt);
+C1 = C*4*m;
+C2 = -C*(2*m+alp2*g*dt);
+
 while(true)
+    
     
     % Mise à jour des positions
     for n =1:N
         
         xi = normrnd(0,1);
         
-        C = 1/(2*m-alp2*g*dt);
-        C1 = C*4*m;
-        C2 = -C*(2*m+alp2*g*dt);
         C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,l));
         
         x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2*x(t-1,n),3);
@@ -92,11 +98,12 @@ while(true)
         
     end
     
+    T = temperature(x,y,N,kb,dt,m); % calcul de la température du système
     
     %  Mise à jour des graphique à tout les 20 images
     if mod(t,100) == 0
         
-        T = temperature(x,y,N,kb,dt,m); % calcul de la température du système
+        
         [xs,ys] = mc(x,y,N); % calcul du centre de masse
         
         addpoints(h2,t,T); % maj de T
@@ -105,31 +112,46 @@ while(true)
         axis(f1,[-xx+xs xx+xs -yy+ys yy+ys]); % maj des axes
         
         drawnow;
-        
-    end
-    
-    
-    % Paramètre du thermostat
-    if T > tmax
-        alp2 = sqrt(T0/T);
-        for n =1:N
-         
-            x(t+1,n) = round(alp2*(x(t,n) - x(t-2,n) ) + x(t-1,n),3);
-            y(t+1,n) = round(alp2*(y(t,n) - y(t-2,n) ) + y(t-1,n),3);
-            
-        end
-        alp2 = 1;
-    else; alp2 = 1;
     end
     
     t = t+1;
     
+    %  Paramètre du thermostat
+    if T > tmax
+        alp2 = sqrt(T0/T);
+        v0 = [];
+        for n =1:N
+            
+            vx = round((3*x(t,n) - 4*x(t-2,n)  + x(t-3,n))/(2*dt),3);
+            vy = round((3*y(t,n) - 4*y(t-2,n)  + y(t-3,n))/(2*dt),3);
+
+            v0(:,end+1) = alp2 * [vx; vy];
+            
+        end
+        
+        for n = 1:N
+            
+            xi = normrnd(0,1);
+            
+            C = 1/(4*m);
+            C1 = C*4*m;
+            C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,l));
+            C2 = C*(2*m+g*dt)*2*dt;
+            x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2.*v0(1,n),3);
+            y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2.*v0(2,n),3);
+            
+        end
+        
+        t = t+1;
+        
+    end
     
     
     if KEY_IS_PRESSED
         close all;
         break;
     end
+    
 end
 
 
@@ -143,6 +165,8 @@ end
 
 function F = force(x,y,n,a)
 
+global TYP
+
 F = [0 0];
 
 for i = 1:length(x)
@@ -155,7 +179,7 @@ for i = 1:length(x)
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        k = LenardJones(a,delta,10,2);
+        k = LenardJones(a,1,20,2);
         
         F(1) = F(1) + k*((delta)*cos(theta));
         F(2) = F(2) + k*((delta)*sin(theta));
@@ -169,12 +193,14 @@ for i = 1:length(x)
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        k = LenardJones(a,delta,10,2);
+        
+        k = LenardJones(a,1,20,2);
         
         F(1) = F(1) - k*((delta)*cos(theta));
         F(2) = F(2) - k*((delta)*sin(theta));
         
-    elseif i ~= n
+    end
+    if i ~= n
         dx = x(n)-x(i);
         dy = y(n)-y(i);
         
@@ -183,10 +209,16 @@ for i = 1:length(x)
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        f = LenardJones(a,delta,-10,1);
+        if TYP(i) == TYP(n)
+            e = -1;
+        else
+            e = 1;
+        end
         
-        F(1) = F(1) - f*cos(theta);
-        F(2) = F(2) - f*sin(theta);
+        f = LenardJones(a,delta,e,1);
+        
+        F(1) = F(1) + f*cos(theta);
+        F(2) = F(2) + f*sin(theta);
         
     end
 end
