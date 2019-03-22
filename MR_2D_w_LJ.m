@@ -5,24 +5,29 @@ gcf;
 set(gcf, 'KeyPressFcn', @myKeyPressFcn);
 close all;
 
+%% Paramètre physique
+
+m = 100*1.66e-27;
+kb = 1.38e-23;
+a = 30e-9;
+epsi = 1;
+r0 = (2-sqrt(2))^(-1/6)*a;
+t0 = r0*sqrt(m/epsi);
+g = 1000e-6;
+T0 = 10;
+F0 = 1/r0;
+
+N=5;
+
 %% Pramètres de simulation
 
 m = 1;
-
-k = 1;
-
 kb = 1.38e-23;
 dt = 0.0006;
-l = 1;
 g = 1e-12;
-xi = 1;
 D = 1/g;
-alp2 = 1;
 
-T0 = 100;
-tmax = 2000;
-
-N=10;
+tmax = 1000000;
 
 
 %% Paramètre graphique
@@ -44,10 +49,13 @@ h2=animatedline;
 %% Conditions initiale
 
 global TYP
-TYP = [];
+TYP = zeros(1,N);
+v0 = zeros(2,N);
+x = zeros(1,N);
+y = zeros(1,N);
 
 for n = 1:N
-    TYP(end+1) = mod(n,2); 
+    TYP(n) = mod(n,2); 
     x(1,n) = randi(10);
     y(1,n) = randi(10);
     v0(1,n) = -1+2*rand(1);
@@ -67,7 +75,7 @@ for n = 1:N
     
     C = 1/(4*m);
     C1 = C*4*m;
-    C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,l));
+    C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,a));
     C2 = C*(2*m+g*dt)*2*dt;
     x(2,n) = round(C1.*x(1,n) + C3(1) + C2.*v0(1,n),3);
     y(2,n) = round(C1.*y(1,n) + C3(2) + C2.*v0(2,n),3);
@@ -79,9 +87,9 @@ end
 
 t = 2;
 
-C = 1/(2*m-alp2*g*dt);
+C = 1/(2*m-g*dt);
 C1 = C*4*m;
-C2 = -C*(2*m+alp2*g*dt);
+C2 = -C*(2*m+g*dt);
 
 while(true)
     
@@ -91,7 +99,7 @@ while(true)
         
         xi = normrnd(0,1);
         
-        C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,l));
+        C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,a));
         
         x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2*x(t-1,n),3);
         y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2*y(t-1,n),3);
@@ -99,6 +107,11 @@ while(true)
     end
     
     T = temperature(x,y,N,kb,dt,m); % calcul de la température du système
+    
+    if t == 2
+       T0 = T; 
+       Tmax = T0*10;
+    end
     
     %  Mise à jour des graphique à tout les 20 images
     if mod(t,100) == 0
@@ -117,34 +130,36 @@ while(true)
     t = t+1;
     
     %  Paramètre du thermostat
-    if T > tmax
-        alp2 = sqrt(T0/T);
-        v0 = [];
-        for n =1:N
-            
-            vx = round((3*x(t,n) - 4*x(t-2,n)  + x(t-3,n))/(2*dt),3);
-            vy = round((3*y(t,n) - 4*y(t-2,n)  + y(t-3,n))/(2*dt),3);
-
-            v0(:,end+1) = alp2 * [vx; vy];
-            
-        end
-        
-        for n = 1:N
-            
-            xi = normrnd(0,1);
-            
-            C = 1/(4*m);
-            C1 = C*4*m;
-            C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,l));
-            C2 = C*(2*m+g*dt)*2*dt;
-            x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2.*v0(1,n),3);
-            y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2.*v0(2,n),3);
-            
-        end
-        
-        t = t+1;
-        
-    end
+%     if T > tmax
+%         
+%         alp2 = sqrt(T0/T)^(-1);
+%         v0 = zeros(2,N);
+%         
+%         for n =1:N
+%             
+%             vx = round((3*x(t,n) - 4*x(t-2,n)  + x(t-3,n))/(2*dt),3);
+%             vy = round((3*y(t,n) - 4*y(t-2,n)  + y(t-3,n))/(2*dt),3);
+% 
+%             v0(:,n) = alp2 * [vx; vy];
+%             
+%         end
+%         
+%         for n = 1:N
+%             
+%             xi = normrnd(0,1);
+%             
+%             C = 1/(4*m);
+%             C1 = C*4*m;
+%             C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,l));
+%             C2 = C*(2*m+g*dt)*2*dt;
+%             x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2.*v0(1,n),3);
+%             y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2.*v0(2,n),3);
+%             
+%         end
+%         
+%         t = t+1;
+%         
+%     end
     
     
     if KEY_IS_PRESSED
@@ -179,7 +194,7 @@ for i = 1:length(x)
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        k = LenardJones(a,1,20,2);
+        k = LenardJones(a,1,1,2);
         
         F(1) = F(1) + k*((delta)*cos(theta));
         F(2) = F(2) + k*((delta)*sin(theta));
@@ -194,7 +209,7 @@ for i = 1:length(x)
         delta = r-a;
         
         
-        k = LenardJones(a,1,20,2);
+        k = LenardJones(a,1,1,2);
         
         F(1) = F(1) - k*((delta)*cos(theta));
         F(2) = F(2) - k*((delta)*sin(theta));
@@ -210,9 +225,9 @@ for i = 1:length(x)
         delta = r-a;
         
         if TYP(i) == TYP(n)
-            e = -1;
-        else
             e = 1;
+        else
+            e = -0.1;
         end
         
         f = LenardJones(a,delta,e,1);
