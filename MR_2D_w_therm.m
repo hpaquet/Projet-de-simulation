@@ -41,16 +41,10 @@ h2=animatedline;
 %%
 
 for n = 1:N
-    
-    xi = normrnd(0,1);
-    
-    C = 1/(4*m);
-    C1 = C*4*m;
-    C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,k,l));
-    C2 = C*(2*m+g*dt)*2*dt;
-    x(2,n) = round(C1.*x(1,n) + C3(1) + C2.*v0(1,n),3);
-    y(2,n) = round(C1.*y(1,n) + C3(2) + C2.*v0(2,n),3);
-    
+    C3 = dt^2*force(x(1,:),y(1,:),n,l)/(2*m);
+
+    x(2,n) = x(1,n) + C3(1) + dt*v0(1,n);
+    y(2,n) = y(1,n) + C3(2) + dt*v0(2,n);
 end
 
 set(h1,'XData',x(end,:),'YData',y(end,:));
@@ -63,15 +57,10 @@ for t = 2:10000
     
     for n =1:N
         
-        xi = normrnd(0,1);
+        C3 = dt^2*force(x(t,:),y(t,:),n,l)/m;
         
-        C = 1/(2*m-g*dt);
-        C1 = C*4*m;
-        C2 = -C*(2*m+g*dt);
-        C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,k,l));
-        
-        x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2*x(t-1,n),3);
-        y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2*y(t-1,n),3);
+        x(t+1,n) = 2*x(t,n) + C3(1) - x(t-1,n);
+        y(t+1,n) = 2*y(t,n) + C3(2) - y(t-1,n);
         
     end
     

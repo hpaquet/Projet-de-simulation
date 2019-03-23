@@ -5,29 +5,17 @@ gcf;
 set(gcf, 'KeyPressFcn', @myKeyPressFcn);
 close all;
 
-%% Paramètre physique
-
-m = 100*1.66e-27;
-kb = 1.38e-23;
-a = 30e-9;
-epsi = 1;
-r0 = (2-sqrt(2))^(-1/6)*a;
-t0 = r0*sqrt(m/epsi);
-g = 1000e-6;
-T0 = 10;
-F0 = 1/r0;
-
-N=5;
-
 %% Pramètres de simulation
 
 m = 1;
 kb = 1.38e-23;
-dt = 0.0006;
-g = 1e-12;
-D = 1/g;
+dt = 0.0001;
+l = 1;
 
+T0 = 10;
 tmax = 1000000;
+
+N=10;
 
 
 %% Paramètre graphique
@@ -70,16 +58,11 @@ end
 %% Première itération (t = 1)
 
 for n = 1:N
-    
-    xi = normrnd(0,1);
-    
-    C = 1/(4*m);
-    C1 = C*4*m;
-    C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,a));
-    C2 = C*(2*m+g*dt)*2*dt;
-    x(2,n) = round(C1.*x(1,n) + C3(1) + C2.*v0(1,n),3);
-    y(2,n) = round(C1.*y(1,n) + C3(2) + C2.*v0(2,n),3);
-    
+
+    C3 = dt^2*force(x(1,:),y(1,:),n,l)/(2*m);
+
+    x(2,n) = x(1,n) + C3(1) + dt*v0(1,n);
+    y(2,n) = y(1,n) + C3(2) + dt*v0(2,n);
 end
 
 
@@ -87,22 +70,16 @@ end
 
 t = 2;
 
-C = 1/(2*m-g*dt);
-C1 = C*4*m;
-C2 = -C*(2*m+g*dt);
-
 while(true)
     
     
     % Mise à jour des positions
     for n =1:N
         
-        xi = normrnd(0,1);
+        C3 = dt^2*force(x(t,:),y(t,:),n,l)/m;
         
-        C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,a));
-        
-        x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2*x(t-1,n),3);
-        y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2*y(t-1,n),3);
+        x(t+1,n) = 2*x(t,n) + C3(1) - x(t-1,n);
+        y(t+1,n) = 2*y(t,n) + C3(2) - y(t-1,n);
         
     end
     
@@ -225,7 +202,7 @@ for i = 1:length(x)
         delta = r-a;
         
         if TYP(i) == TYP(n)
-            e = 1;
+            e = 0.5;
         else
             e = -0.1;
         end

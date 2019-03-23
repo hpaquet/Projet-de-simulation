@@ -15,9 +15,6 @@ k = 1;
 T = 300;
 dt = 0.01;
 l = 3;
-g = 0;
-xi = 0;
-D = 0;
 
 N= 3;
 
@@ -45,12 +42,10 @@ axis([0 100 -5 10]);
 %%
 
 for n = 1:N
-    C = 1/(4*m);
-    C1 = C*4*m;
-    C3 = C*( 2*g*sqrt(2*D)*xi*dt^2 + 2*dt^2*force(x(1,:),y(1,:),n,l));
-    C2 = C*(2*m+g*dt)*2*dt;
-    x(2,n) = C1.*x(1,n) + C3(1) + C2.*v0(1,n);
-    y(2,n) = C1.*y(1,n) + C3(2) + C2.*v0(2,n);
+    C3 = dt^2*force(x(1,:),y(1,:),n,l)/(2*m);
+
+    x(2,n) = x(1,n) + C3(1) + dt*v0(1,n);
+    y(2,n) = y(1,n) + C3(2) + dt*v0(2,n);
 end
 
 set(h,'XData',x(end,:),'YData',y(end,:));
@@ -62,13 +57,11 @@ drawnow;
 for t = 2:10000
     
     for n =1:N
-        C = 1/(2*m-g*dt);
-        C1 = C*4*m;
-        C2 = -C*(2*m+g*dt);
-        C3 = C*( 2*g*sqrt(2*D)*randn(1)*xi*dt^2 + 2*dt^2*force(x(t,:),y(t,:),n,l));
         
-        x(t+1,n) = round(C1.*x(t,n) + C3(1) + C2*x(t-1,n),3);
-        y(t+1,n) = round(C1.*y(t,n) + C3(2) + C2*y(t-1,n),3);
+        C3 = dt^2*force(x(t,:),y(t,:),n,l)/m;
+        
+        x(t+1,n) = 2*x(t,n) + C3(1) - x(t-1,n);
+        y(t+1,n) = 2*y(t,n) + C3(2) - y(t-1,n);
         
     end
     

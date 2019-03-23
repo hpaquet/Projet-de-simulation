@@ -50,9 +50,7 @@ iter=1;
 eps=1e-3;
 arret=0;
 
-
-
- 
+ cnt =0;
 
 while (arret==0)
     %tirage aléatoire
@@ -122,34 +120,27 @@ while (arret==0)
         arret=1;
         end
     end
-        
-        
     
-    %subplot(1,2,1);pcolor(M); axis square;
-
-    %subplot(1,2,1)
-    %refreshdata
-    %drawnow
-    %pcolor(M); axis square;
-    
-    %subplot(1,2,2)
-    %refreshdata
-    %drawnow
-    %plot((1:iter),En); axis square;
-    %xlabel('Iteration');
-    %ylabel('Potentiel')
-
-end  
-
-
-subplot(1,2,1);pcolor(M); axis square;
+    cnt = cnt+1;
+    if ~rem(cnt, 100)
+        
+    subplot(1,2,1);pcolor(M); axis square;
 
     subplot(1,2,1)
+    refreshdata
+    drawnow
     pcolor(M); axis square;
+    
     subplot(1,2,2)
-    plot((1:iter),En); axis square;
+    refreshdata
+    drawnow
+    plot((1:iter),En); axis([cnt 10+cnt -10 0]);
     xlabel('Iteration');
     ylabel('Potentiel')
+    
+    end
+
+end  
 
 
 
