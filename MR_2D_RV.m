@@ -44,9 +44,9 @@ x = zeros(1000,N);
 y = zeros(1000,N);
 
 for n = 1:N
-    TYP(n) = mod(n,2); 
-    x(1,n) = randi(10)*3e-10;
-    y(1,n) = randi(10)*3e-10;
+    TYP(n) = mod(n,2);
+    x(1,n) = rand(1)*10e-9;
+    y(1,n) = rand(1)*10e-9;
     v0(1,n) = (-1+2*rand(1))*random_maxboltz(T0, 1, m);
     v0(2,n) = (-1+2*rand(1))*random_maxboltz(T0, 1, m);
 end
@@ -54,12 +54,14 @@ end
 
 %% Première itération (t = 1)
 
+
 for n = 1:N
-
+    
     C3 = dt^2*force(x(1,:),y(1,:),n,l)/(2*m);
-
+    
     x(2,n) = x(1,n) + C3(1) + dt*v0(1,n);
     y(2,n) = y(1,n) + C3(2) + dt*v0(2,n);
+    
 end
 
 
@@ -107,7 +109,7 @@ while(true)
             
             vx = (3*x(t,n) - 4*x(t-2,n)  + x(t-3,n))/(2*dt);
             vy = (3*y(t,n) - 4*y(t-2,n)  + y(t-3,n))/(2*dt);
-
+            
             v0(:,n) = alp2 * [vx; vy];
             
         end
@@ -115,7 +117,7 @@ while(true)
         for n = 1:N
             
             C3 = dt^2*force(x(t,:),y(t,:),n,l)/(2*m);
-
+            
             x(t+1,n) = x(t,n) + C3(1) + dt*v0(1,n);
             y(t+1,n) = y(t,n) + C3(2) + dt*v0(2,n);
             
@@ -126,8 +128,8 @@ while(true)
     end
     
     if mod(t,1000) == 0
-       x = [x;zeros(1000,N)]; 
-       y = [y;zeros(1000,N)]; 
+        x = [x;zeros(1000,N)];
+        y = [y;zeros(1000,N)];
     end
     
     
@@ -136,10 +138,6 @@ while(true)
         break;
     end
     
-    
-    if t == 1000
-       break 
-    end
     
 end
 
@@ -163,36 +161,29 @@ for i = 1:length(x)
         dx = x(i)-x(n);
         dy = y(i)-y(n);
         
-        theta = atan2(dy,dx);
-        
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
         k = LenardJones(a,1,20,2);
         
-        F(1) = F(1) + k*((delta)*cos(theta));
-        F(2) = F(2) + k*((delta)*sin(theta));
+        F(1) = F(1) + k*((delta)*(dx/r));
+        F(2) = F(2) + k*((delta)*(dy/r));
         
     elseif i == n+1
         dx = x(n)-x(i);
         dy = y(n)-y(i);
         
-        theta = atan2(dy,dx);
-        
         r = sqrt(dx^2+dy^2);
         delta = r-a;
         
-        
         k = LenardJones(a,1,20,2);
         
-        F(1) = F(1) - k*((delta)*cos(theta));
-        F(2) = F(2) - k*((delta)*sin(theta));
+        F(1) = F(1) - k*((delta)*(dx/r));
+        F(2) = F(2) - k*((delta)*(dy/r));
         
     elseif i ~= n
         dx = x(n)-x(i);
         dy = y(n)-y(i);
-        
-        theta = atan2(dy,dx);
         
         r = sqrt(dx^2+dy^2);
         delta = r-a;
@@ -205,8 +196,8 @@ for i = 1:length(x)
         
         f = LenardJones(a,delta,e,1);
         
-        F(1) = F(1) + f*cos(theta);
-        F(2) = F(2) + f*sin(theta);
+        F(1) = F(1) + f*dx/r;
+        F(2) = F(2) + f*dy/r;
         
     end
 end
