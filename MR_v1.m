@@ -8,14 +8,14 @@ a = 5e-8; % distance à l'équilibre entre les AAs
 dt = 1e-25; % pas de temps
 T0 = 10; % Température à l'équilibre
 
-N=64; % Longueur de la chaine
+N=10; % Longueur de la chaine
 
 
 %% Paramètre graphique
 
 % Dimension du graphique 
-xx = 5e-8; 
-yy = 5e-8;
+xx = 4e-8; 
+yy = 4e-8;
 
 figure('Name','Dynamique moléculaire','Position', [ 50 50 1200 600 ],'NumberTitle','off');
 f1 = subplot(1,2,1);
@@ -93,7 +93,7 @@ while(true)
     T = temperature(x,y,N,dt,m,t);
     
     %  Mise à jour des graphique à tout les 10 images
-    if mod(t,10) == 0
+    if mod(t,50) == 0
         
         [xs,ys] = mc(x,y,N,t); % calcul du centre de masse
         
@@ -133,8 +133,11 @@ while(true)
         y = [y;zeros(1000,N)];
     end
     
+    profile on
+    
 end
 
+profile viewer
 
 %% Fonctions
 
