@@ -10,7 +10,7 @@ switch d
         
     case 1 % force
         
-        r = double(r);
+        %r = double(r);
         
         rm7 = 1./(r.^7);
         rm13 = 1./(r.^13);

@@ -10,12 +10,12 @@ close all;
 m = 100*1.66e-27;
 kb = 1.38e-23;
 dt = 1e-25;
-l = 5e-8;
+l = 10e-8;
 
 T0 = 0.5;
 tmax = 30;
 
-N=64;
+N=2;
 
 
 %% Paramètre graphique
