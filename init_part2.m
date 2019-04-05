@@ -2,7 +2,7 @@ clc;clear all;close all;
 %% Pramètres de simulation
 
 dt = 1e-23; % pas de temps
-T0 = 0.1; % Température à l'équilibre
+T0 = 10; % Température à l'équilibre
 N=2; % Longueur de la chaine
 m = 10*1.66e-27; % masse d'un AA
 a = 10e-10; % distance à l'équilibre entre les AAs
@@ -10,9 +10,13 @@ a = 10e-10; % distance à l'équilibre entre les AAs
 %THERMO = true;
 THERMO_on = false;
 
-tmax = 0.01e-18/dt;
+tmax = 1e-18/dt;
 
 fig_on = false;
+
+test = true;
+
+simu = false;
 
 %% Conditions initiale
 
@@ -40,8 +44,8 @@ for n = 1:N
     v0(2,n) = sind(ang)*v; % vitesse initiale en y
 end
 
-v0(1,:) = v0(1,:)-sum(v0(1,:));
-v0(2,:) = v0(2,:)-sum(v0(2,:));
+v0(1,:) = v0(1,:)-sum(v0(1,:))/N;
+v0(2,:) = v0(2,:)-sum(v0(2,:))/N;
 
 
 % Assigne la valeur de epsilon de l'interaction entre deux AAs
@@ -55,18 +59,20 @@ for i = 1:N
     end
 end
 
-k =1e-4*LenardJones(a,1,1,2);
+k =10e-4*LenardJones(a,1,1,2);
 
 %% Test d'erreur
 
-p = [2 4 8 16 32];
+if test == true
+
+p = [2 4 8 16 32 64 128];
 
 ex = zeros(length(p),2);
 ey = zeros(length(p),2);
 n = 1;
 
-dt = 10e-24;
-tmax = 0.1e-18/dt;
+dt = 1e-23;
+tmax = 0.02e-18/dt;
 
 fprintf('Calcul avec dt = %.3e ... \n',dt)
 tic
@@ -74,14 +80,13 @@ tic
 temps = toc;
 fprintf('Calcul exécuté en t = %.3f s \n',temps)
 
-r = sqrt(x.^2+y.^2);
+r = sqrt(x.^2);
 
-xmax = max(r-r(1,:));
 
 for i = 1./p
     
     dtn = dt*i;
-    tmax = 0.1e-18/dtn;
+    tmax = 0.02e-18/dtn;
     
     fprintf('Calcul avec dt = 1/%d dt ... \n',p(n))
     tic
@@ -91,9 +96,8 @@ for i = 1./p
     
     rn = sqrt(xn.^2+yn.^2);
     
-    ex(n,:) = abs(xmax - max(rn-rn(1,:)));
-    %ex(n) = sum(abs(sum(r,1)./size(r,1) - sum(rn,1)./size(rn,1)));
-    xmax = max(rn-rn(1,:));
+    ex(n,:) = sum(abs(r(1:1000/i,:) - rn(1:2:2000/i,:)),1)/N;
+
     r=rn;
     
     n = n+1;
@@ -102,3 +106,10 @@ end
 
 pft = polyfit(log(1./p),log(ex(:,1)'),1);
 loglog(1./p,ex(:,1)');
+
+end
+
+if simu == true
+   [xn,yn] = simulation(dt,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on); 
+end
+

@@ -13,6 +13,7 @@ yy = N*1e-9;
 figure('Name','Dynamique moléculaire','Position', [ 50 50 1200 600 ],'NumberTitle','off');
 f1 = subplot(2,3,[1 2 4 5]);
 h1=plot(0,0,'MarkerSize',50,'Marker','.','LineWidth',3);
+colormap(f1,pink)
 axis off
 axis(f1,[-xx xx -yy yy])
 set(gca,'nextplot','replacechildren')
@@ -31,10 +32,10 @@ end
 
 %% Première itération (t = 1)
 
-C3 = dt^2*force(x(1,:),y(1,:),a,N)/(2*m);
+C = dt^2*force(x(1,:),y(1,:),a,N)/(2*m);
 
-x(2,:) = x(1,:) + C3(1,:) + dt*v0(1,:);
-y(2,:) = y(1,:) + C3(2,:) + dt*v0(2,:);
+x(2,:) = x(1,:) + C(1,:) + dt*v0(1,:);
+y(2,:) = y(1,:) + C(2,:) + dt*v0(2,:);
 
 
 %% Boucle principale (pour t>1)
@@ -45,10 +46,10 @@ while(t < tmax)
     
     % Mise à jour des positions
     
-    C3 = dt^2*force(x(t,:),y(t,:),a,N)/m;
+    C = dt^2*force(x(t,:),y(t,:),a,N)/m;
     
-    x(t+1,:) = 2*x(t,:) + C3(1,:) - x(t-1,:);
-    y(t+1,:) = 2*y(t,:) + C3(2,:) - y(t-1,:);
+    x(t+1,:) = 2*x(t,:) + C(1,:) - x(t-1,:);
+    y(t+1,:) = 2*y(t,:) + C(2,:) - y(t-1,:);
     
     t = t+1;
     
@@ -56,14 +57,14 @@ while(t < tmax)
     T = temperature(x,y,N,dt,m,t);
    
     % Énergie du système
-    E = energie(x,y,a,N,t,m,dt);
+    [Ci E] = energie(x,y,a,N,t,m,dt);
     
     %  Mise à jour des graphique à tout les 10 images
     if fig_on && mod(t,IPA) == 0 
         
         [xs,ys] = mc(x,y,N,t); % calcul du centre de masse
         
-        addpoints(h2,t*dt/1e-18,T); % maj du graphe de la temperature
+        addpoints(h2,t*dt/1e-18,Ci); % maj du graphe de la temperature
         
         addpoints(h3,t*dt/1e-18,E); % maj du graphe de la temperature
         
@@ -86,10 +87,10 @@ while(t < tmax)
         v0 = alp2 * [vx; vy];
         
         % Première itération de la simulation pour repartir la simulation
-        C3 = dt^2*force(x(1,:),y(1,:),a,N)/(2*m);
+        C = dt^2*force(x(1,:),y(1,:),a,N)/(2*m);
         
-        x(t+1,:) = x(t,:) + C3(1,:) + dt*v0(1,:);
-        y(t+1,:) = y(t,:) + C3(2,:) + dt*v0(2,:);
+        x(t+1,:) = x(t,:) + C(1,:) + dt*v0(1,:);
+        y(t+1,:) = y(t,:) + C(2,:) + dt*v0(2,:);
         
         t = t+1;
         
