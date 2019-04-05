@@ -20,7 +20,7 @@ x_sol = [];
 
 %%
 
-for i = [1 0.5 0.25 0.125 0.0625 0.0312]
+for i = [1 1/2 1/4 1/8 1/16 1/32 1/64 1/128]
     
     dt = i*d;
     N = tf/i;
@@ -63,9 +63,11 @@ for k = 1:length(x_sol)-1
     err(k,:) = abs(x_sol(k,:) - x_sol(k+1,:));
 end
 
-N = [0.2000,0.4000,0.8000,1.6000,3.2051]'*1e3;
-% 
-loglog(N,err)
+N = [1 1/2 1/4 1/8 1/16 1/32 1/64 1/128]'*1e3;
+ 
+loglog(N(2:end),err)
+polyfit(log(N(2:end)),log(err(:,1)),1)
+polyfit(log(N(2:end)),log(err(:,2)),1)
 
 
 %%
