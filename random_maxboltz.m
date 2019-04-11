@@ -5,8 +5,7 @@ function [ v ] = random_maxboltz(T, N, m)
 %
 
 v = [];
-k = 1.38e-23;
-a = sqrt(k*T/m); % vitesse la plus probable
+a = sqrt(physconst('Boltzmann')*T/m); % vitesse la plus probable
 
 for i = 1:N
     p = rand(); % nombre aléatoire entre 0 et 1

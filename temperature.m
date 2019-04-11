@@ -1,7 +1,7 @@
 % Calcule la température du système
-function T = temperature(x,y,N,dt,m,t)
+function T = temperature(x,y,N,m,t)
 
-C = m/(2*physconst('Boltzmann')*N);
+C = m/(2*physconst('Boltzmann')*N); 
 
 vx = 3*x(t,:)-4*x(t-1,:)+x(t-2,:);
 vy = 3*y(t,:)-4*y(t-1,:)+y(t-2,:);

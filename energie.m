@@ -1,5 +1,5 @@
 % Calcul l'énergie total du système
-function [K E] = energie(x,y,a,N,t,m,dt)
+function [K U] = energie(x,y,a,N,t,m,dt)
     
     global k VOI
 
