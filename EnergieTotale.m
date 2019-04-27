@@ -9,4 +9,5 @@ for i=1:8
         end
     end
 end
+E=E/2;
 end
