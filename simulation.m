@@ -8,8 +8,8 @@ h = [0 0 0];
 IPA = 100;
     
 % Dimension du graphique
-xx = N*1e-9;
-yy = N*1e-9;
+xx = N*5e-10;
+yy = N*5e-10;
 
 figure('Name','Dynamique moléculaire','Position', [ 50 50 1200 600 ],'NumberTitle','off');
 f1 = subplot(2,3,[1 2 4 5]);
@@ -73,7 +73,7 @@ while(t < tmax)
     T = temperature(x,y,N,m,t);
    
     % Énergie du système
-    [CIN E] = energie(x,y,a,N,t,m,dt);
+    [CIN,E] = energie(x,y,a,N,t,m,dt);
     
     %  Mise à jour des graphique à tout les 10 images
     if fig_on && mod(t,IPA) == 0 
@@ -82,7 +82,7 @@ while(t < tmax)
         
         addpoints(h2,t*dt/1e-18,T); % maj du graphe de la temperature
         
-        addpoints(h3,t*dt/1e-18,E); % maj du graphe de la temperature
+        addpoints(h3,t*dt/1e-18,E+CIN); % maj du graphe de la temperature
         
 %         set(h1,'XData',x(t,:),'YData',y(t,:)); % maj des positions
         for i = 1:2
@@ -97,7 +97,7 @@ while(t < tmax)
     end
     
     %  Thermostat
-    if THERMO && (T > 2*T0 || T< T0/12 ) && t>3
+    if THERMO && (T > 2*T0 || T< T0/2 ) && t>3
         
         alp2 = sqrt(T0/T); % coefficient alpha
         
