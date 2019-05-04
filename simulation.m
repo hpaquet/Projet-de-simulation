@@ -1,12 +1,12 @@
 
-function [x,y] = simulation(dt,tmax,T0,N,m,a,THERMO,v0,x,y,fig_on)
+function [x,y] = simulation(dt,tmax,T0,N,m,a,THERMO,v0,x,y,fig_on,movie)
 %% Paramètre graphique
 if fig_on
 global type
 h = [0 0 0];
 % iteration par image
 IPA = 100;
-    
+frame = 1;
 % Dimension du graphique
 xx = N*5e-10;
 yy = N*5e-10;
@@ -94,6 +94,9 @@ while(t < tmax)
         
         drawnow;
         
+        F(frame) = getframe(gcf);
+        frame = frame + 1;
+        
     end
     
     %  Thermostat
@@ -126,9 +129,16 @@ while(t < tmax)
     
 end
 
+if movie==true
+    video = VideoWriter('dynamiquemoleculaire.avi');
+    video.FrameRate = 10;
+    open(video)
+    writeVideo(video,F(2:end));
+end
 
 x = x(x(:,1) ~= 0,:);
 y = y(x(:,1) ~= 0,:);
+
 
 close;
 

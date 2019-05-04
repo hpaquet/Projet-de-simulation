@@ -2,7 +2,7 @@ clc;clear all;close all;
 %% Pramètres de simulation
 
 
-T0 = 1e23; % Température à l'équilibre
+T0 = 1e20; % Température à l'équilibre
 N=64; % Longueur de la chaine
 m = 75*1.66e-27; % masse d'un AA
 a = 10e-10; % distance à l'équilibre entre les AAs
@@ -23,6 +23,8 @@ repl = false; % test du repliement
 testre = false;
 
 stab  = false; % Analyse de stabilité
+
+movie = false;
 
 %% Conditions initiale
 
@@ -72,7 +74,7 @@ k =1e1*LenardJones(a,1,1,2);
 
 %% Simulation normal
 if simu == true
-    dt = 1e-25; % pas de temps
+    dt = 3e-22; % pas de temps
         type = [1 1 1 1 0 0 1 1 ...
             0 0 1 1 0 0 1 1 ...
             1 1 1 0 0 0 0 0 ...
@@ -81,7 +83,7 @@ if simu == true
             1 0 0 0 0 0 0 1 ...
             1 0 0 0 0 0 0 1 ...
             1 1 1 1 1 1 1 1];
-    [xn,yn] = simulation(dt,0.01/dt,T0,N,m,a,THERMO_on,v0,x,y,true);
+    [xn,yn] = simulation(dt,1e-18/dt,T0,N,m,a,THERMO_on,v0,x,y,true,movie);
 end
 
 %% Test d'erreur
@@ -99,7 +101,7 @@ if test == true
     
     fprintf('Calcul avec dt = %.3e ... \n',dt)
     tic
-    [x,y] = simulation(dt,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on);
+    [x,y] = simulation(dt,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on,false);
     temps = toc;
     fprintf('Calcul exécuté en t = %.3f s \n',temps)
     
@@ -112,7 +114,7 @@ if test == true
         
         fprintf('Calcul avec dt = 1/%d dt ... \n',p(n))
         tic
-        [xn,yn] = simulation(dtn,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on);
+        [xn,yn] = simulation(dtn,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on,false);
         temps = toc;
         fprintf('Calcul exécuté en t = %.3f s \n',temps)
         
@@ -158,7 +160,7 @@ if testre == true
         
         fprintf('Calcul avec dt = 1/%d dt ... \n',p(n))
         tic
-        [xn,yn] = simulation(dtn,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on);
+        [xn,yn] = simulation(dtn,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on,false);
         temps = toc;
         fprintf('Calcul exécuté en t = %.3f s \n',temps)
         
@@ -212,7 +214,7 @@ if repl == true
         v0(1,:) = v0(1,:)-sum(v0(1,:))/N;
         v0(2,:) = v0(2,:)-sum(v0(2,:))/N;
         
-        [x,y] = simulation(dt,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on);
+        [x,y] = simulation(dt,tmax,T0,N,m,a,THERMO_on,v0,x,y,fig_on,false);
         
         % Centre de masse de la protéine
         xs(end+1) = sum(x(end,:))/N;
@@ -277,7 +279,7 @@ if stab == true
         v0(1,:) = v0(1,:)-sum(v0(1,:))/N;
         v0(2,:) = v0(2,:)-sum(v0(2,:))/N;
         
-        [xn,yn] = simulation(dt,0.02e-18/dt,T0n,N,m,a,false,v0,x,y,fig_on);
+        [xn,yn] = simulation(dt,0.02e-18/dt,T0n,N,m,a,false,v0,x,y,fig_on,false);
         
         rn = sqrt(xn.^2+yn.^2);
         
